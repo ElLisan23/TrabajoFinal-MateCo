@@ -1,23 +1,59 @@
 #include "Algoritmo_Djikstra.h"
 #include <functional>
+#include <cmath>
+#include <algorithm>
 
-void Grafo::GenerarAleatorio(int n) {
+#define PI 3.14159265358979
+
+void Grafo::GenerarAleatorio(int n, double asp , double radio) {
+	const int PESO_MIN = 5;
+	const int PESO_MAX = 50;
+
 	numNodos = n;
 	matrizAdyacencia.assign(n, std::vector<int>(n, 0));
-	for (int i = 0; i < n; i++) {
-		bool una_vez = 0;
-		for (int j = i + 1; j < n; j++) {
-			if (una_vez == 0) {
-				int peso = (rand() % 20) + 1;
-				matrizAdyacencia[i][j] = peso;
-				una_vez = 1;
-			}
+	posiciones.clear();
+	if (n <= 0) return;
+	if (asp <= 0) asp = 1.0;
+	aspecto = asp;
 
-			if ((rand() % 100) < 30) {
-				int peso = (rand() % 20) + 1; // Pesos aleatorios entre 1 y 20
-				matrizAdyacencia[i][j] = peso;
+	double dmin = 0.8 * sqrt(asp / n);
+	int fallos = 0;
+	while ((int)posiciones.size() < n) {
+		double x = asp * (rand() / (double)RAND_MAX);
+		double y = rand() / (double)RAND_MAX;
+		bool libre = true;
+		for (size_t k = 0; k < posiciones.size(); k++) {
+			double dx = x - posiciones[k].first;
+			double dy = y - posiciones[k].second;
+			if (dx * dx + dy * dy < dmin * dmin) { libre = false; break; }
+		}
+		if (libre) {
+			posiciones.push_back(std::make_pair(x, y));
+			fallos = 0;
+		}
+		else if (++fallos > 200) {
+			dmin *= 0.9;
+			fallos = 0;
+		}
+	}
+
+	sort(posiciones.begin(), posiciones.end());
+
+	if (radio <= 0) {
+		radio = (n >= 2) ? 1.5 * sqrt(asp * std::log((double)n) / (PI * n)) : 1.0;
+	}
+
+	while (true) {
+		for (int i = 0; i < n; i++) {
+			for (int j = i + 1; j < n; j++) {
+				double dx = posiciones[j].first - posiciones[i].first;
+				double dy = posiciones[j].second - posiciones[i].second;
+				double d = std::sqrt(dx * dx + dy * dy);
+				matrizAdyacencia[i][j] = (d <= radio) ? PESO_MIN + rand() % PESO_MAX : 0;
 			}
 		}
+		if (esConexoNoDirigido(matrizAdyacencia)) break;
+		radio *= 1.1;
 	}
 }
 

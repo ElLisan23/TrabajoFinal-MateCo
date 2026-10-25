@@ -1,7 +1,6 @@
 #pragma once
 #include "Algoritmo_Djikstra.h"
 #include <climits>
-#include <vector>
 #include <queue>
 #include <limits>
 #include <sstream>
@@ -612,18 +611,23 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 		Graphics^ g = e->Graphics;
 		g->SmoothingMode = System::Drawing::Drawing2D::SmoothingMode::AntiAlias;
 
-		int cx = Panel_Grafo->ClientSize.Width / 2;
-		int cy = Panel_Grafo->ClientSize.Height / 2;
-		int radio = Math::Min(cx, cy) - 40;
 		int radioNodo = 18;
 
 		array<Point>^ pos = gcnew array<Point>(n);
-		for (int i = 0; i < n; i++) {
-			double ang = 2 * Math::PI * i / n;
-			pos[i] = Point(cx + (int)(radio * Math::Cos(ang)), cy + (int)(radio * Math::Sin(ang)));
+		if (grafo->TienePosiciones()) {
+			int margen = 40;
+			double asp = grafo->ObtenerAspecto();
+			double escala = Math::Min((Panel_Grafo->ClientSize.Width - 2 * margen) / asp, (double) Panel_Grafo->ClientSize.Height - 2 * margen);
+			for (int i = 0; i < n; i++) {
+				std::pair<double, double> p = grafo->ObtenerPos(i);
+				pos[i] = Point(margen + (int)(p.first * escala), margen + (int)(p.second * escala));
+			}
+		}
+		else {
+			return; // modo manual anexado por el momento
 		}
 
-		// Guardar posiciones para manejo de click
+
 		this->nodosPos = pos;
 		this->radioNodoMember = radioNodo;
 
@@ -633,11 +637,11 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++) {
 				if (matriz[i][j] != 0) {
-					// si visibleEdges está inicializado, solo dibujar si está marcada visible
+
 					if (this->visibleEdges != nullptr && this->visibleEdges->Length == n) {
 						if (!this->visibleEdges[i][j]) continue;
 					}
-					// solo dibujar aristas entre nodos visibles
+
 					if (visibleNodes > 0 && (i >= visibleNodes || j >= visibleNodes)) continue;
 					double dx = pos[j].X - pos[i].X;
 					double dy = pos[j].Y - pos[i].Y;
