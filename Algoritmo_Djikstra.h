@@ -3,12 +3,23 @@
 #include <ctime>
 #include <cstdlib>
 #include <limits>
-
+#include <string>
+#include <utility>
 struct CaminosMinimos {
 	std::vector<std::vector<int>> caminos; // lista de caminos (cada uno es lista de vértices)
 	int distancia; // distancia mínima
 };
-
+struct PasoDijkstra {
+	std::string mensaje;                             
+	int nodoActivo = -1;
+	int iteracion = 0;
+	std::vector<bool> visitados;                     
+	std::vector<int>  dist;                           
+	std::vector<int>  pred;                           
+	std::vector<int>  iterEtiqueta;                   
+	std::vector<std::pair<int, int>> aristasEvaluadas; // para resaltarlas
+	bool esFinal = false;
+};
 class Grafo
 {
 private:
@@ -71,5 +82,12 @@ public:
 	}
 
 
+	//MODO MANUAL
+	void GenerarPosiciones(int n, double aspecto = 1.0);
 
+
+
+	//PASO A PASO
+	static const int INF_DIJ = 1000000000;
+	std::vector<PasoDijkstra> ObtenerPasosDijkstra(int s, int t);
 };

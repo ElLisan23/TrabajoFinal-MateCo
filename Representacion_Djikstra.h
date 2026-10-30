@@ -25,7 +25,10 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 		Grafo* grafo;
 		int origen = -1;
 		int destino = -1;
-
+		std::vector<PasoDijkstra>* pasos;
+		int pasoActual = -1;
+		System::Windows::Forms::Button^ btnAnterior;
+		System::Windows::Forms::Button^ btnSiguiente;
 		// Animacion de creacion de nodos
 		int visibleNodes = 0;
 		System::Windows::Forms::Timer^ nodeTimer;
@@ -57,7 +60,7 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 			// Inicializamos el puntero de nuestro grafo
 			srand((unsigned)time(nullptr)); //Para aleatorizar GG
 			grafo = new Grafo();
-
+			CrearControlesPaso();
 
 			this->DoubleBuffered = true;
 			this->SetStyle(ControlStyles::OptimizedDoubleBuffer |
@@ -83,70 +86,31 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 	private: System::Void btnRunDijkstra_Click(System::Object^ sender, System::EventArgs^ e) {
 		int n = grafo->ObtenerNumNodos();
 		if (n == 0) { MessageBox::Show("Grafo vacío."); return; }
-		int s = -1, t = -1;
-		if (this->cmbDijOrigen->SelectedIndex >= 0) s = this->cmbDijOrigen->SelectedIndex;
-		if (this->cmbDijDestino->SelectedIndex >= 0) t = this->cmbDijDestino->SelectedIndex;
+		int s = this->cmbDijOrigen->SelectedIndex;
+		int t = this->cmbDijDestino->SelectedIndex;
 		if (s == -1 || t == -1) { MessageBox::Show("Selecciona origen y destino para Dijkstra."); return; }
 		if (s == t) { MessageBox::Show("Origen y destino deben ser distintos."); return; }
 
-		// Usar el método que encuentra TODOS los caminos mínimos
-		CaminosMinimos resultado = grafo->ObtenerCaminosMinimos(s, t);
+		this->origen = s;
+		this->destino = t;
+		*pasos = grafo->ObtenerPasosDijkstra(s, t);
+		this->pasoActual = 0;
+		MostrarPaso();
+	}
 
-		std::stringstream log;
-
-		if (resultado.caminos.empty()) {
-			log << "No existe camino desde el vértice " << s << " hasta el vértice " << t << ".";
-		}
-		else {
-			log << "Camino(s) mínimo(s) desde vértice " << s << " hasta vértice " << t << ":\r\n";
-			log << "Distancia mínima: " << resultado.distancia << "\r\n\r\n";
-
-			if (resultado.caminos.size() == 1) {
-				log << "Camino (único): ";
-				for (size_t i = 0; i < resultado.caminos[0].size(); ++i) {
-					log << resultado.caminos[0][i];
-					if (i + 1 < resultado.caminos[0].size()) log << " -> ";
-				}
-				log << "\r\n";
-			}
-			else {
-				log << "Se encontraron " << resultado.caminos.size() << " caminos mínimos de igual distancia:\r\n\r\n";
-				for (size_t c = 0; c < resultado.caminos.size(); ++c) {
-					log << "Camino " << (c + 1) << ": ";
-					for (size_t i = 0; i < resultado.caminos[c].size(); ++i) {
-						log << resultado.caminos[c][i];
-						if (i + 1 < resultado.caminos[c].size()) log << " -> ";
-					}
-					log << "\r\n";
-				}
-			}
-		}
-
-		this->txtDijkstraInfo->Text = gcnew String(log.str().c_str());
-
-		// Resaltar todos los caminos con colores diferentes
+	private: void ResaltarCaminos(const CaminosMinimos& resultado) {
 		this->pathColors = gcnew System::Collections::Generic::List<System::Drawing::Color>();
 		this->allHighlightedPaths = gcnew System::Collections::Generic::List<System::Collections::Generic::List<System::Tuple<int, int>^>^>();
-
-		// Colores para los caminos (primero rojo, luego azul, luego verde, etc.)
-		array<System::Drawing::Color>^ colors = gcnew array<System::Drawing::Color> {
-			System::Drawing::Color::Red,
-				System::Drawing::Color::Blue,
-				System::Drawing::Color::Green,
-				System::Drawing::Color::Orange,
-				System::Drawing::Color::Purple
-		};
-
+		array<System::Drawing::Color>^ colors = gcnew array<System::Drawing::Color>{
+			System::Drawing::Color::Red, System::Drawing::Color::Blue, System::Drawing::Color::Green,
+			System::Drawing::Color::Orange, System::Drawing::Color::Purple };
 		for (size_t c = 0; c < resultado.caminos.size(); ++c) {
-			System::Collections::Generic::List<System::Tuple<int, int>^>^ camino_edges = gcnew System::Collections::Generic::List<System::Tuple<int, int>^>();
-			for (size_t i = 1; i < resultado.caminos[c].size(); ++i) {
+			auto camino_edges = gcnew System::Collections::Generic::List<System::Tuple<int, int>^>();
+			for (size_t i = 1; i < resultado.caminos[c].size(); ++i)
 				camino_edges->Add(System::Tuple::Create(resultado.caminos[c][i - 1], resultado.caminos[c][i]));
-			}
 			this->allHighlightedPaths->Add(camino_edges);
 			this->pathColors->Add(colors[c % colors->Length]);
 		}
-
-		this->Panel_Grafo->Refresh();
 	}
 
 		   // Muestra un cuadro de diálogo simple para pedir una cadena al usuario.
@@ -198,6 +162,8 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 
 			if (components)
 			{
+				delete pasos;
+				delete grafo;
 				delete components;
 			}
 		}
@@ -495,6 +461,7 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 	}
 
 	private: System::Void Btn_Generar_Grafo_Click(System::Object^ sender, System::EventArgs^ e) {
+		ReiniciarPasos();
 		int n = safe_cast<int>(this->txtNodos->Value);
 		if (this->rbManual->Checked) {
 			// Leer matriz desde el textbox (cada fila en una línea, valores separados por espacios)
@@ -552,7 +519,6 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 		}
 		else {
 			grafo->GenerarAleatorio(n);
-			// Mostrar la matriz generada en el cuadro de texto para que el usuario la vea
 			const std::vector<std::vector<int>>& mat = grafo->ObtenerMatriz();
 			System::Text::StringBuilder^ sb = gcnew System::Text::StringBuilder();
 			for (int i = 0; i < n; ++i) {
@@ -574,7 +540,7 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 			this->edgeRevealIndex = 0;
 			this->animatingEdges = true; // empezar a revelar aristas
 			this->nodeTimer->Start();
-			// actualizar combos Dijkstra inmediatamente (nodos ya visibles)
+
 			this->cmbDijOrigen->Items->Clear();
 			this->cmbDijDestino->Items->Clear();
 			for (int i = 0; i < n; ++i) { this->cmbDijOrigen->Items->Add(i.ToString()); this->cmbDijDestino->Items->Add(i.ToString()); }
@@ -582,7 +548,6 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 
 		Panel_Grafo->Refresh();
 
-		// actualizar solo los combos del panel derecho (Dijkstra)
 		this->cmbDijOrigen->Items->Clear();
 		this->cmbDijDestino->Items->Clear();
 		for (int i = 0; i < n; i++) {
@@ -597,6 +562,7 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 		this->txtManualInput->Visible = this->rbManual->Checked;
 		if (this->rbManual->Checked) {
 			// Al pasar a modo manual, borrar grafo existente (si lo había)
+			ReiniciarPasos();
 			this->grafo->Vaciar();
 			this->Panel_Grafo->Refresh();
 			this->origen = -1;
@@ -607,7 +573,9 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 		int n = grafo->ObtenerNumNodos();
 		if (n == 0) return;
 		const std::vector<std::vector<int>>& matriz = grafo->ObtenerMatriz();
-
+		const PasoDijkstra* paso = nullptr;
+		if (pasos != nullptr && pasoActual >= 0 && pasoActual < (int)pasos->size())
+			paso = &(*pasos)[pasoActual];
 		Graphics^ g = e->Graphics;
 		g->SmoothingMode = System::Drawing::Drawing2D::SmoothingMode::AntiAlias;
 
@@ -668,7 +636,10 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 								if (colorIndex >= 0) break;
 							}
 						}
-
+						bool evaluando = false;
+						if (paso != nullptr)
+							for (size_t a = 0; a < paso->aristasEvaluadas.size(); ++a)
+								if (paso->aristasEvaluadas[a].first == i && paso->aristasEvaluadas[a].second == j) evaluando = true;
 						if (colorIndex >= 0) {
 							// resaltar con color del camino
 							System::Drawing::Color pathColor = this->pathColors[colorIndex];
@@ -676,10 +647,14 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 							penR->CustomEndCap = gcnew System::Drawing::Drawing2D::AdjustableArrowCap(6, 8);
 							g->DrawLine(penR, pInicio, pFin);
 						}
+						else if (evaluando) {
+							Pen^ penE = gcnew Pen(Color::DarkOrange, 3);
+							penE->CustomEndCap = gcnew System::Drawing::Drawing2D::AdjustableArrowCap(6, 8);
+							g->DrawLine(penE, pInicio, pFin);
+						}
 						else {
 							g->DrawLine(penArista, pInicio, pFin);
 						}
-
 						Point medio((pInicio.X + pFin.X) / 2, (pInicio.Y + pFin.Y) / 2);
 						g->DrawString(matriz[i][j].ToString(), this->Font, Brushes::Red, medio);
 					}
@@ -688,16 +663,37 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 		}
 		for (int i = 0; i < n; i++) {
 			Rectangle r(pos[i].X - radioNodo, pos[i].Y - radioNodo, radioNodo * 2, radioNodo * 2);
-			if (this->seleccionadoOrigenClick == i) {
-				g->FillEllipse(Brushes::LightGreen, r);
+			System::Drawing::Font^ fEt = gcnew System::Drawing::Font("Segoe UI", 7.5F, FontStyle::Bold);
+
+			for (int i = 0; i < n; i++) {
+				Rectangle r(pos[i].X - radioNodo, pos[i].Y - radioNodo, radioNodo * 2, radioNodo * 2);
+
+				Brush^ relleno = Brushes::LightSkyBlue;
+				if (this->seleccionadoOrigenClick == i) relleno = Brushes::LightGreen;
+				if (paso != nullptr) {
+					if (paso->esFinal && i == origen)       relleno = Brushes::Orange;
+					else if (paso->esFinal && i == destino) relleno = Brushes::DeepSkyBlue;
+					else if (paso->nodoActivo == i)         relleno = Brushes::Gold;        // procesándose ahora
+					else if (paso->visitados[i])            relleno = Brushes::LightGreen;  // etiqueta permanente
+				}
+				g->FillEllipse(relleno, r);
+				g->DrawEllipse(Pens::Black, r);
+
+				String^ etq = i.ToString();
+				SizeF tam = g->MeasureString(etq, this->Font);
+				g->DrawString(etq, this->Font, Brushes::Black, pos[i].X - tam.Width / 2, pos[i].Y - tam.Height / 2);
+
+				// Etiqueta [d,V](i) debajo del nodo
+				if (paso != nullptr && paso->dist[i] < Grafo::INF_DIJ) {
+					String^ et = "[" + Convert::ToString(paso->dist[i]) + "," +
+						(paso->pred[i] == -1 ? "-" : Convert::ToString(paso->pred[i])) + "](" +
+						Convert::ToString(paso->iterEtiqueta[i]) + ")";
+					SizeF te = g->MeasureString(et, fEt);
+					g->DrawString(et, fEt,
+						paso->visitados[i] ? Brushes::DarkGreen : Brushes::DarkOrange,
+						pos[i].X - te.Width / 2, pos[i].Y + radioNodo + 1);
+				}
 			}
-			else {
-				g->FillEllipse(Brushes::LightSkyBlue, r);
-			}
-			g->DrawEllipse(Pens::Black, r);
-			String^ etq = i.ToString();
-			SizeF tam = g->MeasureString(etq, this->Font);
-			g->DrawString(etq, this->Font, Brushes::Black, pos[i].X - tam.Width / 2, pos[i].Y - tam.Height / 2);
 		}
 	}
 
@@ -757,12 +753,78 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 			return;
 		}
 		// agregado correctamente
+		ReiniciarPasos();
 		 // marcar arista visible (si estructura inicializada)
 		if (this->visibleEdges != nullptr && this->visibleEdges->Length == grafo->ObtenerNumNodos()) this->visibleEdges[origenClick][destinoClick] = true;
 		this->seleccionadoOrigenClick = -1;
 		this->Panel_Grafo->Refresh();
 	}
+	private: void CrearControlesPaso() {
+		pasos = new std::vector<PasoDijkstra>();
 
+		// el cuadro de la derecha ahora muestra el paso actual
+		this->txtDijkstraInfo->Size = System::Drawing::Size(226, 300);
+		this->txtDijkstraInfo->ReadOnly = true;
+		this->txtDijkstraInfo->Font = gcnew System::Drawing::Font("Consolas", 8.25F);
+
+		btnAnterior = gcnew Button();
+		btnAnterior->Text = L"<< Anterior";
+		btnAnterior->Location = System::Drawing::Point(825, 458);
+		btnAnterior->Size = System::Drawing::Size(110, 28);
+		btnAnterior->Enabled = false;
+		btnAnterior->Click += gcnew System::EventHandler(this, &Representacion_Dijkstra::btnAnterior_Click);
+		this->Controls->Add(btnAnterior);
+
+		btnSiguiente = gcnew Button();
+		btnSiguiente->Text = L"Siguiente >>";
+		btnSiguiente->Location = System::Drawing::Point(941, 458);
+		btnSiguiente->Size = System::Drawing::Size(110, 28);
+		btnSiguiente->Enabled = false;
+		btnSiguiente->Click += gcnew System::EventHandler(this, &Representacion_Dijkstra::btnSiguiente_Click);
+		this->Controls->Add(btnSiguiente);
+	}
+
+private: System::Void btnSiguiente_Click(System::Object^ sender, System::EventArgs^ e) {
+	if (pasoActual < (int)pasos->size() - 1) { pasoActual++; MostrarPaso(); }
+}
+private: System::Void btnAnterior_Click(System::Object^ sender, System::EventArgs^ e) {
+	if (pasoActual > 0) { pasoActual--; MostrarPaso(); }
+}
+
+private: void ReiniciarPasos() {
+	pasos->clear();
+	pasoActual = -1;
+	allHighlightedPaths = nullptr;
+	pathColors = nullptr;
+	btnAnterior->Enabled = false;
+	btnSiguiente->Enabled = false;
+	txtDijkstraInfo->Text = "";
+}
+
+private: void MostrarPaso() {
+	if (pasoActual < 0 || pasoActual >= (int)pasos->size()) return;
+	const PasoDijkstra& p = (*pasos)[pasoActual];
+
+	std::stringstream ss;
+	ss << "Paso " << (pasoActual + 1) << " de " << pasos->size() << "\r\n\r\n"
+		<< p.mensaje << "\r\n\r\nEtiquetas [d,V](i):\r\n";
+	for (size_t i = 0; i < p.dist.size(); ++i) {
+		if (p.dist[i] >= Grafo::INF_DIJ) continue;
+		ss << "  v" << i << ": [" << p.dist[i] << ","
+			<< (p.pred[i] == -1 ? std::string("-") : std::to_string(p.pred[i]))
+			<< "](" << p.iterEtiqueta[i] << ")" << (p.visitados[i] ? "  *permanente" : "") << "\r\n";
+	}
+	txtDijkstraInfo->Text = gcnew String(ss.str().c_str());
+
+	btnAnterior->Enabled = (pasoActual > 0);
+	btnSiguiente->Enabled = (pasoActual < (int)pasos->size() - 1);
+
+	// Solo en el último paso se resaltan los caminos con colores
+	if (p.esFinal) ResaltarCaminos(grafo->ObtenerCaminosMinimos(origen, destino));
+	else { allHighlightedPaths = nullptr; pathColors = nullptr; }
+
+	Panel_Grafo->Refresh();
+}
 	private: System::Void Representacion_Dijkstra_Load(System::Object^ sender, System::EventArgs^ e) {
 	}
 	};

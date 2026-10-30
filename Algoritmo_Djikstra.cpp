@@ -2,7 +2,8 @@
 #include <functional>
 #include <cmath>
 #include <algorithm>
-
+#include <sstream>
+#include <string> 
 #define PI 3.14159265358979
 
 void Grafo::GenerarAleatorio(int n, double asp , double radio) {
@@ -11,34 +12,10 @@ void Grafo::GenerarAleatorio(int n, double asp , double radio) {
 
 	numNodos = n;
 	matrizAdyacencia.assign(n, std::vector<int>(n, 0));
-	posiciones.clear();
+	GenerarPosiciones(n, asp);
 	if (n <= 0) return;
 	if (asp <= 0) asp = 1.0;
-	aspecto = asp;
-
-	double dmin = 0.8 * sqrt(asp / n);
-	int fallos = 0;
-	while ((int)posiciones.size() < n) {
-		double x = asp * (rand() / (double)RAND_MAX);
-		double y = rand() / (double)RAND_MAX;
-		bool libre = true;
-		for (size_t k = 0; k < posiciones.size(); k++) {
-			double dx = x - posiciones[k].first;
-			double dy = y - posiciones[k].second;
-			if (dx * dx + dy * dy < dmin * dmin) { libre = false; break; }
-		}
-		if (libre) {
-			posiciones.push_back(std::make_pair(x, y));
-			fallos = 0;
-		}
-		else if (++fallos > 200) {
-			dmin *= 0.9;
-			fallos = 0;
-		}
-	}
-
-	sort(posiciones.begin(), posiciones.end());
-
+	asp = aspecto;
 	if (radio <= 0) {
 		radio = (n >= 2) ? 1.5 * sqrt(asp * std::log((double)n) / (PI * n)) : 1.0;
 	}
@@ -80,17 +57,19 @@ bool Grafo::CargarDesdeMatriz(const std::vector<std::vector<int>>& mat) {
 		return false;
 		};
 
+
 	for (int i = 0; i < n; ++i) {
 		if (color[i] == 0) {
 			if (dfs(i)) {
-				// Restaurar grafo vacío en caso de detectar ciclo
 				matrizAdyacencia.assign(0, std::vector<int>());
 				numNodos = 0;
+				posiciones.clear();      
 				return false;
 			}
 		}
 	}
 
+	GenerarPosiciones(n);               
 	return true;
 }
 
@@ -128,6 +107,7 @@ bool Grafo::AgregarAristaSiAcyclic(int u, int v, int peso) {
 void Grafo::Vaciar() {
 	numNodos = 0;
 	matrizAdyacencia.clear();
+	posiciones.clear();
 }
 
 CaminosMinimos Grafo::ObtenerCaminosMinimos(int s, int t) {
@@ -207,4 +187,132 @@ CaminosMinimos Grafo::ObtenerCaminosMinimos(int s, int t) {
 	construir_caminos(t);
 
 	return resultado;
+}
+
+void Grafo::GenerarPosiciones(int n, double asp) {
+	posiciones.clear();
+	if (n <= 0) return;
+	if (asp <= 0) asp = 1.0;
+	aspecto = asp;
+
+	double dmin = 0.8 * sqrt(asp / n);
+	int fallos = 0;
+	while ((int)posiciones.size() < n) {
+		double x = asp * (rand() / (double)RAND_MAX);
+		double y = rand() / (double)RAND_MAX;
+		bool libre = true;
+		for (size_t k = 0; k < posiciones.size(); k++) {
+			double dx = x - posiciones[k].first;
+			double dy = y - posiciones[k].second;
+			if (dx * dx + dy * dy < dmin * dmin) { libre = false; break; }
+		}
+		if (libre) {
+			posiciones.push_back(std::make_pair(x, y));
+			fallos = 0;
+		}
+		else if (++fallos > 200) {
+			dmin *= 0.9;
+			fallos = 0;
+		}
+	}
+	std::sort(posiciones.begin(), posiciones.end());
+}
+
+std::vector<PasoDijkstra> Grafo::ObtenerPasosDijkstra(int s, int t) {
+	std::vector<PasoDijkstra> pasos;
+	if (s < 0 || s >= numNodos || t < 0 || t >= numNodos || s == t) return pasos;
+
+	const int n = numNodos;
+	std::vector<int> dist(n, INF_DIJ), pred(n, -1), iterEt(n, -1);
+	std::vector<bool> vis(n, false);
+	dist[s] = 0;
+	iterEt[s] = 0;
+
+	auto foto = [&](const std::string& msg, int activo, int it) {
+		PasoDijkstra p;
+		p.mensaje = msg; p.nodoActivo = activo; p.iteracion = it;
+		p.visitados = vis; p.dist = dist; p.pred = pred; p.iterEtiqueta = iterEt;
+		return p;
+		};
+	auto txtPred = [&](int v) { return pred[v] == -1 ? std::string("-") : std::to_string(pred[v]); };
+
+	{
+		std::ostringstream m;
+		m << "Vertice origen = " << s << "\r\n"
+			<< "Etiqueta del origen: [0,-](0)";
+		pasos.push_back(foto(m.str(), s, 0));
+	}
+
+	int it = 0;
+	for (int k = 0; k < n; ++k) {
+		++it;
+
+		int u = -1, mejor = INF_DIJ;
+		for (int j = 0; j < n; ++j)
+			if (!vis[j] && dist[j] < mejor) { mejor = dist[j]; u = j; }
+		if (u == -1) break;
+		vis[u] = true;
+
+		{
+			std::ostringstream m;
+			m << "Seleccion del vertice con menor distancia (iteracion " << it << ")\r\n"
+				<< "Vertice " << u << " con d = " << dist[u] << "\r\n"
+				<< "Etiqueta PERMANENTE: [" << dist[u] << "," << txtPred(u) << "](" << iterEt[u] << ")";
+			pasos.push_back(foto(m.str(), u, it));
+		}
+
+		std::ostringstream m;
+		m << "Vecinos de " << u << " (iteracion " << it << ")\r\n\r\n";
+		std::vector<std::pair<int, int>> evaluadas;
+
+		for (int v = 0; v < n; ++v) {
+			int w = matrizAdyacencia[u][v];
+			if (w == 0 || vis[v]) continue;
+			int nueva = dist[u] + w;
+			evaluadas.push_back(std::make_pair(u, v));
+
+			m << "Arista " << u << " -> " << v << " (peso " << w << ")\r\n"
+				<< "Nueva distancia: " << dist[u] << " + " << w << " = " << nueva << "\r\n";
+
+			if (nueva < dist[v]) {
+				m << "[ACTUALIZAR] Nueva etiqueta [" << nueva << "," << u << "](" << it << ")\r\n\r\n";
+				dist[v] = nueva; pred[v] = u; iterEt[v] = it;
+			}
+			else if (nueva == dist[v]) {
+				m << "[EMPATE] Mismo costo: tambien se llega por " << u << "\r\n\r\n";
+			}
+			else {
+				m << "[CONSERVAR] Se mantiene la etiqueta [" << dist[v] << "," << txtPred(v) << "]\r\n\r\n";
+			}
+		}
+		if (!evaluadas.empty()) {
+			PasoDijkstra p = foto(m.str(), u, it);
+			p.aristasEvaluadas = evaluadas;
+			pasos.push_back(p);
+		}
+	}
+
+	
+	CaminosMinimos r = ObtenerCaminosMinimos(s, t);
+	std::ostringstream m;
+	m << " Determinacion de rutas minimas\r\n\r\n";
+	if (r.caminos.empty()) {
+		m << "No existe camino de " << s << " a " << t << ".";
+	}
+	else {
+		m << "Distancia minima: " << r.distancia << "\r\n"
+			<< "Cantidad de caminos minimos: " << r.caminos.size() << "\r\n\r\n";
+		for (size_t c = 0; c < r.caminos.size(); ++c) {
+			m << "Camino " << (c + 1) << ": ";
+			for (size_t i = 0; i < r.caminos[c].size(); ++i) {
+				m << r.caminos[c][i];
+				if (i + 1 < r.caminos[c].size()) m << " -> ";
+			}
+			m << "\r\n";
+		}
+	}
+	PasoDijkstra f = foto(m.str(), t, it);
+	f.esFinal = true;
+	pasos.push_back(f);
+	return pasos;
 }
