@@ -52,7 +52,11 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 		System::Windows::Forms::Button^ btnRunDijkstra;
 		System::Windows::Forms::TextBox^ txtDijkstraInfo;
 		System::Windows::Forms::Label^ lblDijOrigen;
-		System::Windows::Forms::Label^ lblDijDestino;
+	private: System::Windows::Forms::Label^ label1;
+	private: System::Windows::Forms::Label^ label2;
+	private: System::Windows::Forms::Label^ label3;
+	private: System::Windows::Forms::Label^ label4;
+		   System::Windows::Forms::Label^ lblDijDestino;
 	public:
 		Representacion_Dijkstra(void)
 		{
@@ -79,7 +83,7 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 			this->lblMode->Visible = true;
 			this->lblMode->Text = manual ? "Modo: Manual" : "Modo: Aleatorio";
 			// mostrar indicación para generar desde matriz si es manual
-			this->lblMatrixHint->Visible = manual;
+			this->lblMatrixHint->Visible = true;
 		}
 
 		// Ejecutar Dijkstra y mostrar información del camino mínimo (solo el camino, sin iteraciones)
@@ -259,40 +263,53 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 			this->txtDijkstraInfo = (gcnew System::Windows::Forms::TextBox());
 			this->lblDijOrigen = (gcnew System::Windows::Forms::Label());
 			this->lblDijDestino = (gcnew System::Windows::Forms::Label());
+			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->label2 = (gcnew System::Windows::Forms::Label());
+			this->label3 = (gcnew System::Windows::Forms::Label());
+			this->label4 = (gcnew System::Windows::Forms::Label());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->txtNodos))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// txtNodos
 			// 
-			this->txtNodos->Location = System::Drawing::Point(20, 86);
-			this->txtNodos->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+			this->txtNodos->BackColor = System::Drawing::SystemColors::ControlLight;
+			this->txtNodos->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 14.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->txtNodos->Location = System::Drawing::Point(9, 98);
+			this->txtNodos->Margin = System::Windows::Forms::Padding(2);
 			this->txtNodos->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 16, 0, 0, 0 });
 			this->txtNodos->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 7, 0, 0, 0 });
 			this->txtNodos->Name = L"txtNodos";
-			this->txtNodos->Size = System::Drawing::Size(90, 20);
+			this->txtNodos->Size = System::Drawing::Size(71, 29);
 			this->txtNodos->TabIndex = 1;
 			this->txtNodos->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 7, 0, 0, 0 });
 			this->txtNodos->ValueChanged += gcnew System::EventHandler(this, &Representacion_Dijkstra::txtNodos_ValueChanged);
 			// 
 			// Btn_Generar_Grafo
 			// 
-			this->Btn_Generar_Grafo->Location = System::Drawing::Point(34, 135);
-			this->Btn_Generar_Grafo->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+			this->Btn_Generar_Grafo->BackColor = System::Drawing::SystemColors::HighlightText;
+			this->Btn_Generar_Grafo->Font = (gcnew System::Drawing::Font(L"Segoe UI", 15.75F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->Btn_Generar_Grafo->ForeColor = System::Drawing::SystemColors::ActiveCaptionText;
+			this->Btn_Generar_Grafo->Location = System::Drawing::Point(9, 136);
+			this->Btn_Generar_Grafo->Margin = System::Windows::Forms::Padding(2);
 			this->Btn_Generar_Grafo->Name = L"Btn_Generar_Grafo";
-			this->Btn_Generar_Grafo->Size = System::Drawing::Size(56, 19);
+			this->Btn_Generar_Grafo->Size = System::Drawing::Size(202, 52);
 			this->Btn_Generar_Grafo->TabIndex = 2;
-			this->Btn_Generar_Grafo->Text = L"Presioname";
-			this->Btn_Generar_Grafo->UseVisualStyleBackColor = true;
+			this->Btn_Generar_Grafo->Text = L"Generar";
+			this->Btn_Generar_Grafo->UseVisualStyleBackColor = false;
 			this->Btn_Generar_Grafo->Click += gcnew System::EventHandler(this, &Representacion_Dijkstra::Btn_Generar_Grafo_Click);
 			// 
 			// rbAleatorio
 			// 
 			this->rbAleatorio->AutoSize = true;
 			this->rbAleatorio->Checked = true;
-			this->rbAleatorio->Location = System::Drawing::Point(20, 32);
-			this->rbAleatorio->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+			this->rbAleatorio->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->rbAleatorio->Location = System::Drawing::Point(80, 19);
+			this->rbAleatorio->Margin = System::Windows::Forms::Padding(2);
 			this->rbAleatorio->Name = L"rbAleatorio";
-			this->rbAleatorio->Size = System::Drawing::Size(66, 17);
+			this->rbAleatorio->Size = System::Drawing::Size(90, 24);
 			this->rbAleatorio->TabIndex = 0;
 			this->rbAleatorio->TabStop = true;
 			this->rbAleatorio->Text = L"Aleatorio";
@@ -301,10 +318,12 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 			// rbManual
 			// 
 			this->rbManual->AutoSize = true;
-			this->rbManual->Location = System::Drawing::Point(20, 49);
-			this->rbManual->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+			this->rbManual->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->rbManual->Location = System::Drawing::Point(80, 43);
+			this->rbManual->Margin = System::Windows::Forms::Padding(2);
 			this->rbManual->Name = L"rbManual";
-			this->rbManual->Size = System::Drawing::Size(60, 17);
+			this->rbManual->Size = System::Drawing::Size(79, 24);
 			this->rbManual->TabIndex = 0;
 			this->rbManual->TabStop = true;
 			this->rbManual->Text = L"Manual";
@@ -314,22 +333,24 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 			// txtManualInput
 			// 
 			this->txtManualInput->AcceptsTab = true;
-			this->txtManualInput->Location = System::Drawing::Point(9, 292);
-			this->txtManualInput->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+			this->txtManualInput->BackColor = System::Drawing::SystemColors::ControlLight;
+			this->txtManualInput->Location = System::Drawing::Point(9, 255);
+			this->txtManualInput->Margin = System::Windows::Forms::Padding(2);
 			this->txtManualInput->Multiline = true;
 			this->txtManualInput->Name = L"txtManualInput";
 			this->txtManualInput->ScrollBars = System::Windows::Forms::ScrollBars::Both;
-			this->txtManualInput->Size = System::Drawing::Size(213, 201);
+			this->txtManualInput->Size = System::Drawing::Size(202, 265);
 			this->txtManualInput->TabIndex = 10;
 			this->txtManualInput->Visible = false;
 			this->txtManualInput->WordWrap = false;
 			// 
 			// Panel_Grafo
 			// 
+			this->Panel_Grafo->BackColor = System::Drawing::SystemColors::GradientInactiveCaption;
 			this->Panel_Grafo->Location = System::Drawing::Point(226, 10);
-			this->Panel_Grafo->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+			this->Panel_Grafo->Margin = System::Windows::Forms::Padding(2);
 			this->Panel_Grafo->Name = L"Panel_Grafo";
-			this->Panel_Grafo->Size = System::Drawing::Size(574, 483);
+			this->Panel_Grafo->Size = System::Drawing::Size(574, 510);
 			this->Panel_Grafo->TabIndex = 3;
 			this->Panel_Grafo->Paint += gcnew System::Windows::Forms::PaintEventHandler(this, &Representacion_Dijkstra::Panel_Grafo_Paint);
 			this->Panel_Grafo->MouseClick += gcnew System::Windows::Forms::MouseEventHandler(this, &Representacion_Dijkstra::Panel_Grafo_MouseClick);
@@ -337,31 +358,38 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 			// lblAviso
 			// 
 			this->lblAviso->AutoSize = true;
-			this->lblAviso->Location = System::Drawing::Point(18, 69);
+			this->lblAviso->Font = (gcnew System::Drawing::Font(L"Palatino Linotype", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->lblAviso->Location = System::Drawing::Point(5, 69);
 			this->lblAviso->Margin = System::Windows::Forms::Padding(2, 0, 2, 0);
 			this->lblAviso->Name = L"lblAviso";
-			this->lblAviso->Size = System::Drawing::Size(204, 13);
+			this->lblAviso->Size = System::Drawing::Size(168, 26);
 			this->lblAviso->TabIndex = 0;
-			this->lblAviso->Text = L"Mínimo permitido: 7, Máximo permitido: 16";
+			this->lblAviso->Text = L"Min = 7; Max = 16";
 			// 
 			// lblMatrixHint
 			// 
 			this->lblMatrixHint->AutoSize = true;
-			this->lblMatrixHint->Location = System::Drawing::Point(9, 272);
+			this->lblMatrixHint->Font = (gcnew System::Drawing::Font(L"Palatino Linotype", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->lblMatrixHint->Location = System::Drawing::Point(5, 227);
 			this->lblMatrixHint->Margin = System::Windows::Forms::Padding(2, 0, 2, 0);
 			this->lblMatrixHint->Name = L"lblMatrixHint";
-			this->lblMatrixHint->Size = System::Drawing::Size(169, 13);
+			this->lblMatrixHint->Size = System::Drawing::Size(129, 26);
 			this->lblMatrixHint->TabIndex = 0;
-			this->lblMatrixHint->Text = L"Generar el grafo a traves de matriz";
+			this->lblMatrixHint->Text = L"Matriz Grafo";
 			this->lblMatrixHint->Visible = false;
+			this->lblMatrixHint->Click += gcnew System::EventHandler(this, &Representacion_Dijkstra::lblMatrixHint_Click);
 			// 
 			// lblMode
 			// 
 			this->lblMode->AutoSize = true;
-			this->lblMode->Location = System::Drawing::Point(20, 10);
+			this->lblMode->Font = (gcnew System::Drawing::Font(L"Palatino Linotype", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->lblMode->Location = System::Drawing::Point(4, 17);
 			this->lblMode->Margin = System::Windows::Forms::Padding(2, 0, 2, 0);
 			this->lblMode->Name = L"lblMode";
-			this->lblMode->Size = System::Drawing::Size(0, 13);
+			this->lblMode->Size = System::Drawing::Size(0, 26);
 			this->lblMode->TabIndex = 1;
 			this->lblMode->Visible = false;
 			// 
@@ -372,70 +400,132 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 			// 
 			// cmbDijOrigen
 			// 
-			this->cmbDijOrigen->Location = System::Drawing::Point(825, 32);
-			this->cmbDijOrigen->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+			this->cmbDijOrigen->BackColor = System::Drawing::SystemColors::ControlLight;
+			this->cmbDijOrigen->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 14.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->cmbDijOrigen->Location = System::Drawing::Point(966, 11);
+			this->cmbDijOrigen->Margin = System::Windows::Forms::Padding(2);
 			this->cmbDijOrigen->Name = L"cmbDijOrigen";
-			this->cmbDijOrigen->Size = System::Drawing::Size(114, 21);
+			this->cmbDijOrigen->Size = System::Drawing::Size(80, 32);
 			this->cmbDijOrigen->TabIndex = 11;
 			// 
 			// cmbDijDestino
 			// 
-			this->cmbDijDestino->Location = System::Drawing::Point(825, 85);
-			this->cmbDijDestino->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+			this->cmbDijDestino->BackColor = System::Drawing::SystemColors::ControlLight;
+			this->cmbDijDestino->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 14.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->cmbDijDestino->Location = System::Drawing::Point(966, 47);
+			this->cmbDijDestino->Margin = System::Windows::Forms::Padding(2);
 			this->cmbDijDestino->Name = L"cmbDijDestino";
-			this->cmbDijDestino->Size = System::Drawing::Size(114, 21);
+			this->cmbDijDestino->Size = System::Drawing::Size(80, 32);
 			this->cmbDijDestino->TabIndex = 12;
 			// 
 			// btnRunDijkstra
 			// 
-			this->btnRunDijkstra->Location = System::Drawing::Point(825, 123);
-			this->btnRunDijkstra->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+			this->btnRunDijkstra->BackColor = System::Drawing::SystemColors::HighlightText;
+			this->btnRunDijkstra->Font = (gcnew System::Drawing::Font(L"Segoe UI", 15.75F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->btnRunDijkstra->Location = System::Drawing::Point(811, 89);
+			this->btnRunDijkstra->Margin = System::Windows::Forms::Padding(2);
 			this->btnRunDijkstra->Name = L"btnRunDijkstra";
-			this->btnRunDijkstra->Size = System::Drawing::Size(112, 24);
+			this->btnRunDijkstra->Size = System::Drawing::Size(235, 45);
 			this->btnRunDijkstra->TabIndex = 13;
 			this->btnRunDijkstra->Text = L"Ejecutar Dijkstra";
+			this->btnRunDijkstra->UseVisualStyleBackColor = false;
 			this->btnRunDijkstra->Click += gcnew System::EventHandler(this, &Representacion_Dijkstra::btnRunDijkstra_Click);
 			// 
 			// txtDijkstraInfo
 			// 
-			this->txtDijkstraInfo->Location = System::Drawing::Point(825, 151);
-			this->txtDijkstraInfo->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+			this->txtDijkstraInfo->BackColor = System::Drawing::SystemColors::ControlLight;
+			this->txtDijkstraInfo->Location = System::Drawing::Point(814, 166);
+			this->txtDijkstraInfo->Margin = System::Windows::Forms::Padding(2);
 			this->txtDijkstraInfo->Multiline = true;
 			this->txtDijkstraInfo->Name = L"txtDijkstraInfo";
 			this->txtDijkstraInfo->ScrollBars = System::Windows::Forms::ScrollBars::Both;
-			this->txtDijkstraInfo->Size = System::Drawing::Size(226, 342);
+			this->txtDijkstraInfo->Size = System::Drawing::Size(232, 354);
 			this->txtDijkstraInfo->TabIndex = 14;
 			// 
 			// lblDijOrigen
 			// 
 			this->lblDijOrigen->AutoSize = true;
-			this->lblDijOrigen->Location = System::Drawing::Point(825, 16);
+			this->lblDijOrigen->Font = (gcnew System::Drawing::Font(L"Palatino Linotype", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->lblDijOrigen->Location = System::Drawing::Point(810, 13);
 			this->lblDijOrigen->Margin = System::Windows::Forms::Padding(2, 0, 2, 0);
 			this->lblDijOrigen->Name = L"lblDijOrigen";
-			this->lblDijOrigen->Size = System::Drawing::Size(119, 13);
+			this->lblDijOrigen->Size = System::Drawing::Size(144, 26);
 			this->lblDijOrigen->TabIndex = 15;
-			this->lblDijOrigen->Text = L"Vértice origen (Dijkstra):";
+			this->lblDijOrigen->Text = L"Vértice origen:";
 			// 
 			// lblDijDestino
 			// 
 			this->lblDijDestino->AutoSize = true;
-			this->lblDijDestino->Location = System::Drawing::Point(825, 69);
+			this->lblDijDestino->Font = (gcnew System::Drawing::Font(L"Palatino Linotype", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->lblDijDestino->Location = System::Drawing::Point(810, 49);
 			this->lblDijDestino->Margin = System::Windows::Forms::Padding(2, 0, 2, 0);
 			this->lblDijDestino->Name = L"lblDijDestino";
-			this->lblDijDestino->Size = System::Drawing::Size(124, 13);
+			this->lblDijDestino->Size = System::Drawing::Size(152, 26);
 			this->lblDijDestino->TabIndex = 16;
-			this->lblDijDestino->Text = L"Vértice destino (Dijkstra):";
+			this->lblDijDestino->Text = L"Vértice destino:";
+			// 
+			// label1
+			// 
+			this->label1->AutoSize = true;
+			this->label1->Font = (gcnew System::Drawing::Font(L"Palatino Linotype", 14.25F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->label1->ForeColor = System::Drawing::SystemColors::ControlText;
+			this->label1->Location = System::Drawing::Point(84, 101);
+			this->label1->Margin = System::Windows::Forms::Padding(2, 0, 2, 0);
+			this->label1->Name = L"label1";
+			this->label1->Size = System::Drawing::Size(78, 26);
+			this->label1->TabIndex = 17;
+			this->label1->Text = L"Vértices";
+			// 
+			// label2
+			// 
+			this->label2->AutoSize = true;
+			this->label2->Font = (gcnew System::Drawing::Font(L"Source Han Sans JP", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(128)));
+			this->label2->Location = System::Drawing::Point(4, 199);
+			this->label2->Name = L"label2";
+			this->label2->Size = System::Drawing::Size(221, 28);
+			this->label2->TabIndex = 18;
+			this->label2->Text = L"===================";
+			// 
+			// label3
+			// 
+			this->label3->AutoSize = true;
+			this->label3->Font = (gcnew System::Drawing::Font(L"Source Han Sans JP", 14.25F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(128)));
+			this->label3->Location = System::Drawing::Point(809, 136);
+			this->label3->Name = L"label3";
+			this->label3->Size = System::Drawing::Size(243, 28);
+			this->label3->TabIndex = 19;
+			this->label3->Text = L"=====================";
+			// 
+			// label4
+			// 
+			this->label4->Location = System::Drawing::Point(0, 0);
+			this->label4->Name = L"label4";
+			this->label4->Size = System::Drawing::Size(100, 23);
+			this->label4->TabIndex = 0;
 			// 
 			// Representacion_Dijkstra
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
+			this->BackColor = System::Drawing::SystemColors::ActiveCaption;
 			this->ClientSize = System::Drawing::Size(1057, 531);
+			this->Controls->Add(this->label4);
+			this->Controls->Add(this->label3);
+			this->Controls->Add(this->label2);
+			this->Controls->Add(this->Btn_Generar_Grafo);
+			this->Controls->Add(this->label1);
 			this->Controls->Add(this->lblMatrixHint);
 			this->Controls->Add(this->lblMode);
 			this->Controls->Add(this->lblAviso);
 			this->Controls->Add(this->Panel_Grafo);
-			this->Controls->Add(this->Btn_Generar_Grafo);
 			this->Controls->Add(this->txtNodos);
 			this->Controls->Add(this->rbAleatorio);
 			this->Controls->Add(this->rbManual);
@@ -446,7 +536,7 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 			this->Controls->Add(this->txtDijkstraInfo);
 			this->Controls->Add(this->lblDijOrigen);
 			this->Controls->Add(this->lblDijDestino);
-			this->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
+			this->Margin = System::Windows::Forms::Padding(2);
 			this->Name = L"Representacion_Dijkstra";
 			this->Text = L"Representacion_Dijkstra";
 			this->Load += gcnew System::EventHandler(this, &Representacion_Dijkstra::Representacion_Dijkstra_Load);
@@ -523,11 +613,12 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 			System::Text::StringBuilder^ sb = gcnew System::Text::StringBuilder();
 			for (int i = 0; i < n; ++i) {
 				for (int j = 0; j < n; ++j) {
-					sb->Append(System::Convert::ToString(mat[i][j]));
+					sb->Append(System::Convert::ToString(mat[i][j])->PadLeft(2));
 					if (j < n - 1) sb->Append(" ");
 				}
 				if (i < n - 1) sb->AppendLine();
 			}
+			this->txtManualInput->Font = gcnew System::Drawing::Font("Consolas", 9);
 			this->txtManualInput->Text = sb->ToString();
 			this->txtManualInput->Visible = true;
 			// mostrar nodos inmediatamente, preparar animacion solo para aristas
@@ -769,16 +860,25 @@ namespace TrabajoFinalMateComputacionalAlgoritmoDijkstra2 {
 
 		btnAnterior = gcnew Button();
 		btnAnterior->Text = L"<< Anterior";
-		btnAnterior->Location = System::Drawing::Point(825, 458);
-		btnAnterior->Size = System::Drawing::Size(110, 28);
+		btnAnterior->Location = System::Drawing::Point(815, 480);
+		btnAnterior->Size = System::Drawing::Size(110, 35);
+		btnAnterior->BackColor = System::Drawing::Color::White;
+		this->btnAnterior->Font = (gcnew System::Drawing::Font(L"Segoe UI", 10.00F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+			static_cast<System::Byte>(0)));
 		btnAnterior->Enabled = false;
 		btnAnterior->Click += gcnew System::EventHandler(this, &Representacion_Dijkstra::btnAnterior_Click);
 		this->Controls->Add(btnAnterior);
 
+
+
+
 		btnSiguiente = gcnew Button();
 		btnSiguiente->Text = L"Siguiente >>";
-		btnSiguiente->Location = System::Drawing::Point(941, 458);
-		btnSiguiente->Size = System::Drawing::Size(110, 28);
+		btnSiguiente->Location = System::Drawing::Point(930, 480);
+		btnSiguiente->Size = System::Drawing::Size(110, 35);
+		btnSiguiente->BackColor = System::Drawing::Color::White;
+		this->btnSiguiente->Font = (gcnew System::Drawing::Font(L"Segoe UI", 10.00F, System::Drawing::FontStyle::Bold, System::Drawing::GraphicsUnit::Point,
+			static_cast<System::Byte>(0)));
 		btnSiguiente->Enabled = false;
 		btnSiguiente->Click += gcnew System::EventHandler(this, &Representacion_Dijkstra::btnSiguiente_Click);
 		this->Controls->Add(btnSiguiente);
@@ -827,5 +927,7 @@ private: void MostrarPaso() {
 }
 	private: System::Void Representacion_Dijkstra_Load(System::Object^ sender, System::EventArgs^ e) {
 	}
-	};
+private: System::Void lblMatrixHint_Click(System::Object^ sender, System::EventArgs^ e) {
+}
+};
 }
